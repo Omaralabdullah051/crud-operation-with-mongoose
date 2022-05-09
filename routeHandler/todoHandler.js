@@ -39,6 +39,58 @@ router.get('/', async (req, res) => {
 //     }).clone()
 // });
 
+//*GET ACTIVE TODOS (async await)
+router.get('/active', async (req, res) => {
+    const todo = new Todo();
+    try {
+        const data = await todo.findActive();
+        //*Here findActive is a custom instance method.follow the post api where we use save built-in instant method.
+        res.status(200).json({ result: data, message: "success" });
+    }
+    catch (err) {
+        res.status(500).json({ error: "There as a server side error" });
+    }
+});
+
+//*GET ACTIVE TODOS WITH CALLBACK
+router.get('/actives', (req, res) => {
+    const todo = new Todo();
+    todo.findActiveCallback((err, data) => {
+        if (err) {
+            res.status(500).json({ error: "There was a server side error" });
+        }
+        else {
+            res.status(200).json({ result: data, message: "success" });
+        }
+    });
+});
+
+
+//*GET TODOS By LANGUAGE (async await)
+router.get('/language', async (req, res) => {
+    try {
+        const data = await Todo.find({}).byLanguage("react").byLimit(2).bySelect(0);
+        //*Here byLanguage,byLimit & bySelect are our custom query helpers
+        res.status(200).json({ result: data, message: "success" });
+    }
+    catch (err) {
+        res.status(500).json({ error: "There as a server side error" });
+    }
+});
+
+//*GET JS TODOS (async await) (by using our custom static methods)
+router.get('/activess', async (req, res) => {
+    try {
+        const data = await Todo.findByJS();
+        //*Here findByJS is our custom static methods
+        res.status(200).json({ result: data, message: "success" });
+    }
+    catch (err) {
+        res.status(500).json({ error: "There as a server side error" });
+    }
+});
+
+
 //*If we want to get all the items but don't want to get all the field of the item(here we don't need id,date)(callback procedure)
 router.get('/todo', (req, res) => {
     Todo.find({}).select({
@@ -81,7 +133,7 @@ router.get('/todolimit', (req, res) => {
                 });
             }
         });
-
+    //*Here we chainging the Todo  by .limit ,.exec, etc. these are built-in query helpers.
 });
 
 //*GET A TODO BY ID (follow the async await process)
@@ -167,6 +219,22 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+//*PUT TODO (just update the item) (async await) (by using our custom static method)
+router.put('/updatetodo/:id', async (req, res) => {
+    try {
+        const data = await Todo.updateTodo(req.params.id, req.body.description);
+        res.status(200).json({
+            message: "Todo was updated successfully"
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            error: "There was a server side error"
+        });
+    }
+});
+
+
 //*find by Id and update (when we want to update any item and get the updated item) (async await)
 router.put('/update/:id', async (req, res) => {
     try {
@@ -209,6 +277,23 @@ router.delete('/:id', async (req, res) => {
         });
     }
 });
+
+//*DELETE TODO (just delete the item) (async await) (by using custom instance method)
+router.delete('/deletetodo/:id', async (req, res) => {
+    const todo = new Todo();
+    try {
+        await todo.deleteTodo(req.params.id);
+        res.status(200).json({
+            message: "Todo was deleted successfully"
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            error: "There was a server side error"
+        });
+    }
+});
+
 
 //*find by Id and delete (when we want to delete any item and get the deleted item) (async await)
 router.delete('/delete/:id', async (req, res) => {
